@@ -57,9 +57,8 @@
         .btn:hover {
             background-color: #45a049;
         }
-        .btn-small {
-            padding: 5px 10px;
-            font-size: 12px;
+        .btn-red {
+            background-color: #f44336;
         }
         .form-group {
             margin-bottom: 10px;
@@ -106,6 +105,7 @@
         </div>
 
         <button class="btn" onclick="showForm()">Saya Hadir</button>
+        <button class="btn btn-red" onclick="berhalanganHadir()">Berhalangan Hadir</button>
 
         <div id="formKehadiran" style="display: none; margin-top: 20px;">
             <h3>Isi Data Kehadiran</h3>
@@ -115,7 +115,7 @@
             <div class="form-group">
                 <input type="text" id="nomorWa" placeholder="Nomor WhatsApp (628xxx)" required>
             </div>
-            <button class="btn" onclick="daftarHadir()">Konfirmasi Kehadiran</button>
+            <button class="btn" onclick="daftarHadir(true)">Konfirmasi Kehadiran</button>
         </div>
 
         <div class="list-peserta">
@@ -123,9 +123,8 @@
             <table>
                 <thead>
                     <tr>
-                        <th>No</th>
                         <th>Nama</th>
-                        <th>Juz</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody id="listPeserta">
@@ -133,20 +132,18 @@
                 </tbody>
             </table>
 
-            <!-- Tombol reset kecil di bawah tabel -->
-            <button class="btn btn-small reset-btn" onclick="konfirmasiReset()">Reset Daftar</button>
+            <button class="btn reset-btn" onclick="konfirmasiReset()">Reset Daftar</button>
         </div>
     </div>
 
     <script>
         let peserta = JSON.parse(localStorage.getItem("peserta")) || [];
-        let juzTerakhir = peserta.length ? peserta[peserta.length - 1].juz : 0;
 
         function showForm() {
             document.getElementById("formKehadiran").style.display = "block";
         }
 
-        function daftarHadir() {
+        function daftarHadir(hadir) {
             let nama = document.getElementById("nama").value.trim();
             let nomorWa = document.getElementById("nomorWa").value.trim();
 
@@ -161,42 +158,50 @@
             }
 
             let pesertaIndex = peserta.findIndex(p => p.nomorWa === nomorWa);
-
             if (pesertaIndex !== -1) {
                 alert("Nomor WhatsApp ini sudah terdaftar!");
                 return;
             }
 
-            // Menentukan juz yang akan diberikan
-            juzTerakhir = (juzTerakhir % 30) + 1;
-            
+            let status = hadir ? "✅ Insya Allah hadir" : "❌ Berhalangan Hadir";
+
             let pesertaBaru = {
                 nama: nama,
                 nomorWa: nomorWa,
-                juz: juzTerakhir
+                status: status
             };
 
             peserta.push(pesertaBaru);
             localStorage.setItem("peserta", JSON.stringify(peserta));
             updateTampilan();
 
-            // Kirim ke WhatsApp
-            let pesan = `Assalamu'alaikum, saya *${nama}* telah mengkonfirmasi kehadiran di acara TAQRI. Saya mendapat tugas membaca *Juz ${juzTerakhir}*.`;
+            let pesan = `Assalamu'alaikum, saya *${nama}* telah mengkonfirmasi kehadiran di acara TAQRI. *${status}.*`;
             window.open(`https://wa.me/6289656433788?text=${encodeURIComponent(pesan)}`, "_blank");
 
             document.getElementById("formKehadiran").reset();
             document.getElementById("formKehadiran").style.display = "none";
         }
 
+        function berhalanganHadir() {
+            let nama = prompt("Masukkan Nama Lengkap:");
+            if (!nama) return;
+
+            let pesan = `Assalamu'alaikum, saya *${nama}* menginformasikan bahwa saya *berhalangan hadir* di acara TAQRI.`;
+            window.open(`https://wa.me/6289656433788?text=${encodeURIComponent(pesan)}`, "_blank");
+
+            peserta.push({ nama: nama, status: "❌ Berhalangan Hadir" });
+            localStorage.setItem("peserta", JSON.stringify(peserta));
+            updateTampilan();
+        }
+
         function updateTampilan() {
             let listPeserta = document.getElementById("listPeserta");
             listPeserta.innerHTML = "";
 
-            peserta.forEach((p, index) => {
+            peserta.forEach(p => {
                 let row = `<tr>
-                    <td>${index + 1}</td>
                     <td>${p.nama}</td>
-                    <td>Juz ${p.juz}</td>
+                    <td>${p.status}</td>
                 </tr>`;
                 listPeserta.innerHTML += row;
             });
@@ -214,32 +219,9 @@
         function resetList() {
             localStorage.removeItem("peserta");
             peserta = [];
-            juzTerakhir = 0;
             updateTampilan();
         }
 
-        function startCountdown() {
-            let countDownDate = new Date("March 17, 2025 15:15:00").getTime();
-
-            let interval = setInterval(function () {
-                let now = new Date().getTime();
-                let distance = countDownDate - now;
-
-                if (distance < 0) {
-                    clearInterval(interval);
-                    document.getElementById("countdown").innerHTML = "Acara telah dimulai!";
-                    return;
-                }
-
-                let hours = Math.floor(distance / (1000 * 60 * 60));
-                let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                let seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                document.getElementById("countdown").innerHTML = `⏳ ${hours}j ${minutes}m ${seconds}d`;
-            }, 1000);
-        }
-
-        startCountdown();
         updateTampilan();
     </script>
 
