@@ -178,7 +178,6 @@
             let pesan = `Assalamu'alaikum, saya *${nama}* telah mengkonfirmasi kehadiran di acara TAQRI. *${status}.*`;
             window.open(`https://wa.me/6289656433788?text=${encodeURIComponent(pesan)}`, "_blank");
 
-            document.getElementById("formKehadiran").reset();
             document.getElementById("formKehadiran").style.display = "none";
         }
 
@@ -207,21 +206,28 @@
             });
         }
 
-        function konfirmasiReset() {
-            let password = prompt("Masukkan password untuk reset:");
-            if (password === "taqri123") {
-                resetList();
-            } else {
-                alert("Password salah!");
-            }
+        function startCountdown() {
+            let eventDate = new Date("March 17, 2025 15:30:00").getTime();
+            let countdownElement = document.getElementById("countdown");
+
+            setInterval(() => {
+                let now = new Date().getTime();
+                let difference = eventDate - now;
+
+                if (difference <= 0) {
+                    countdownElement.innerHTML = "⏳ Acara telah dimulai!";
+                    return;
+                }
+
+                let hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                let minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                let seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+                countdownElement.innerHTML = `🕒 ${hours} jam ${minutes} menit ${seconds} detik lagi`;
+            }, 1000);
         }
 
-        function resetList() {
-            localStorage.removeItem("peserta");
-            peserta = [];
-            updateTampilan();
-        }
-
+        startCountdown();
         updateTampilan();
     </script>
 
