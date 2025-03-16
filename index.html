@@ -3,77 +3,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kehadiran Taqri</title>
+    <title>TAQRI - Insan Sejahtera</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        #countdown { font-size: 24px; margin: 20px 0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid black; padding: 10px; }
-        button { padding: 10px; margin-top: 10px; cursor: pointer; }
-        #resetForm { display: none; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            margin: auto;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            font-size: 30px;
+            color: #4CAF50;
+        }
+        .countdown {
+            font-size: 20px;
+            font-weight: bold;
+            color: red;
+            margin-bottom: 15px;
+        }
+        .info {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        .text-orange {
+            color: orange;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .text-black {
+            color: black;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        .list-peserta {
+            margin-top: 20px;
+            text-align: left;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .reset-btn {
+            margin-top: 10px;
+            background-color: #f44336;
+        }
     </style>
 </head>
 <body>
 
-    <h1>Konfirmasi Kehadiran</h1>
-    <div id="countdown"></div>
+    <div class="container">
+        <h1>TAQRI - Insan Sejahtera</h1>
+        <div class="countdown" id="countdown"></div>
+        <p class="info">📅 Senin, 17 Maret 2025 <br> 🕒 15:30 WIB <br> 📍 Masjid Salahuddin Al-Ayyubi</p>
 
-    <form id="kehadiranForm">
-        <input type="text" id="nama" placeholder="Nama" required><br>
-        <input type="text" id="nomor_wa" placeholder="Nomor WA" required><br>
-        <button type="submit">Konfirmasi Kehadiran</button>
-    </form>
+        <div>
+            <p class="text-orange">Moderator:</p>
+            <p class="text-black">Ustadz Azmi Abdul Latip</p>
 
-    <h2>Daftar Kehadiran</h2>
-    <table>
-        <thead>
-            <tr><th>Nama</th><th>Nomor WA</th><th>Juz</th></tr>
-        </thead>
-        <tbody id="listKehadiran"></tbody>
-    </table>
+            <p class="text-orange">Narasumber:</p>
+            <p class="text-black">Ustadz Gharin Azmil Muassasi Andari, Lc</p>
+        </div>
 
-    <button onclick="showReset()">Reset Data</button>
-    <form id="resetForm">
-        <input type="password" id="resetPass" placeholder="Masukkan Password"><br>
-        <button type="button" onclick="resetData()">Konfirmasi Reset</button>
-    </form>
+        <button class="btn" onclick="showForm()">Saya Hadir</button>
+
+        <div id="formKehadiran" style="display: none; margin-top: 20px;">
+            <h3>Isi Data Kehadiran</h3>
+            <div class="form-group">
+                <input type="text" id="nama" placeholder="Nama Lengkap" required>
+            </div>
+            <div class="form-group">
+                <input type="text" id="nomorWa" placeholder="Nomor WhatsApp (628xxx)" required>
+            </div>
+            <button class="btn" onclick="daftarHadir()">Konfirmasi Kehadiran</button>
+        </div>
+
+        <div class="list-peserta">
+            <h3>Daftar Kehadiran</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama</th>
+                        <th>Juz</th>
+                    </tr>
+                </thead>
+                <tbody id="listPeserta">
+                    <!-- Data peserta akan muncul di sini -->
+                </tbody>
+            </table>
+
+            <!-- Tombol reset kecil di bawah tabel -->
+            <button class="btn btn-small reset-btn" onclick="konfirmasiReset()">Reset Daftar</button>
+        </div>
+    </div>
 
     <script>
-        const eventTime = new Date().setHours(15, 15, 0, 0);
-        setInterval(() => {
-            const now = new Date().getTime();
-            const distance = eventTime - now;
-            const hours = Math.floor(distance / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-            document.getElementById("countdown").innerHTML = `Waktu Tersisa: ${hours}j ${minutes}m ${seconds}d`;
-        }, 1000);
+        let peserta = JSON.parse(localStorage.getItem("peserta")) || [];
+        let juzTerakhir = peserta.length ? peserta[peserta.length - 1].juz : 0;
 
-        document.getElementById("kehadiranForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-            let nama = document.getElementById("nama").value;
-            let nomor_wa = document.getElementById("nomor_wa").value;
+        function showForm() {
+            document.getElementById("formKehadiran").style.display = "block";
+        }
 
-            fetch("api.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: `nama=${nama}&nomor_wa=${nomor_wa}`
-            }).then(response => response.json()).then(data => {
-                alert(data.message);
-                loadKehadiran();
-            });
-        });
+        function daftarHadir() {
+            let nama = document.getElementById("nama").value.trim();
+            let nomorWa = document.getElementById("nomorWa").value.trim();
 
-        function loadKehadiran() {
-            fetch("api.php").then(response => response.json()).then(data => {
-                let list = data.map(item => `<tr><td>${item.nama}</td><td>${item.nomor_wa}</td><td>${item.juz}</td></tr>`).join("");
-                document.getElementById("listKehadiran").innerHTML = list;
+            if (nama === "" || nomorWa === "") {
+                alert("Mohon isi semua data!");
+                return;
+            }
+
+            if (!nomorWa.startsWith("628")) {
+                alert("Gunakan format nomor WhatsApp yang benar (misal: 628xxxxxxxxxx)");
+                return;
+            }
+
+            let pesertaIndex = peserta.findIndex(p => p.nomorWa === nomorWa);
+
+            if (pesertaIndex !== -1) {
+                alert("Nomor WhatsApp ini sudah terdaftar!");
+                return;
+            }
+
+            // Menentukan juz yang akan diberikan
+            juzTerakhir = (juzTerakhir % 30) + 1;
+            
+            let pesertaBaru = {
+                nama: nama,
+                nomorWa: nomorWa,
+                juz: juzTerakhir
+            };
+
+            peserta.push(pesertaBaru);
+            localStorage.setItem("peserta", JSON.stringify(peserta));
+            updateTampilan();
+
+            // Kirim ke WhatsApp
+            let pesan = `Assalamu'alaikum, saya *${nama}* telah mengkonfirmasi kehadiran di acara TAQRI. Saya mendapat tugas membaca *Juz ${juzTerakhir}*.`;
+            window.open(`https://wa.me/6289656433788?text=${encodeURIComponent(pesan)}`, "_blank");
+
+            document.getElementById("formKehadiran").reset();
+            document.getElementById("formKehadiran").style.display = "none";
+        }
+
+        function updateTampilan() {
+            let listPeserta = document.getElementById("listPeserta");
+            listPeserta.innerHTML = "";
+
+            peserta.forEach((p, index) => {
+                let row = `<tr>
+                    <td>${index + 1}</td>
+                    <td>${p.nama}</td>
+                    <td>Juz ${p.juz}</td>
+                </tr>`;
+                listPeserta.innerHTML += row;
             });
         }
 
-        function showReset() { document.getElementById("resetForm").style.display = "block"; }
-        function resetData() { /* Fetch reset.php */ }
-        loadKehadiran();
+        function konfirmasiReset() {
+            let password = prompt("Masukkan password untuk reset:");
+            if (password === "taqri123") {
+                resetList();
+            } else {
+                alert("Password salah!");
+            }
+        }
+
+        function resetList() {
+            localStorage.removeItem("peserta");
+            peserta = [];
+            juzTerakhir = 0;
+            updateTampilan();
+        }
+
+        function startCountdown() {
+            let countDownDate = new Date("March 17, 2025 15:15:00").getTime();
+
+            let interval = setInterval(function () {
+                let now = new Date().getTime();
+                let distance = countDownDate - now;
+
+                if (distance < 0) {
+                    clearInterval(interval);
+                    document.getElementById("countdown").innerHTML = "Acara telah dimulai!";
+                    return;
+                }
+
+                let hours = Math.floor(distance / (1000 * 60 * 60));
+                let minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                let seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                document.getElementById("countdown").innerHTML = `⏳ ${hours}j ${minutes}m ${seconds}d`;
+            }, 1000);
+        }
+
+        startCountdown();
+        updateTampilan();
     </script>
 
 </body>
