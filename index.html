@@ -3,42 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Taqri - Kehadiran</title>
-    <link rel="stylesheet" href="style.css">
+    <title>TAQRI - Insan Sejahtera</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            margin: auto;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .form-group {
+            margin-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>TAQRI</h1>
-        <h2>Takhtif & Tilawah Qur'an Ramadhan Insan Sejahtera</h2>
+        <h1>TAQRI - Insan Sejahtera</h1>
+        <button class="btn" onclick="showForm()">Saya Hadir</button>
 
-        <div class="countdown">
-            <h3>Waktu Acara Dimulai:</h3>
-            <p id="timer"></p>
+        <div id="formKehadiran" style="display: none; margin-top: 20px;">
+            <h3>Isi Data Kehadiran</h3>
+            <div class="form-group">
+                <input type="text" id="nama" placeholder="Nama Lengkap" required>
+            </div>
+            <div class="form-group">
+                <input type="text" id="nomorWa" placeholder="Nomor WhatsApp (628xxx)" required>
+            </div>
+            <div class="form-group">
+                <label for="juz">Pilih Juz (1-30):</label>
+                <select id="juz"></select>
+            </div>
+            <button class="btn" onclick="daftarHadir()">Konfirmasi Kehadiran</button>
         </div>
 
-        <h3 class="judul">Kehadiran</h3>
-
-        <form id="kehadiranForm">
-            <input type="text" id="nama" placeholder="Masukkan Nama" required>
-            <input type="number" id="juz" placeholder="Masukkan Juz (1-30)" min="1" max="30" required>
-            <button type="submit">Hadir</button>
-        </form>
-
-        <h3>Daftar Kehadiran</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Nama</th>
-                    <th>Juz</th>
-                </tr>
-            </thead>
-            <tbody id="kehadiranList"></tbody>
-        </table>
-
-        <button id="resetButton">Reset Kehadiran</button>
+        <div class="list-peserta">
+            <h3>Daftar Kehadiran</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama</th>
+                        <th>Juz</th>
+                    </tr>
+                </thead>
+                <tbody id="listPeserta">
+                    <!-- Data peserta akan muncul di sini -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        function showForm() {
+            document.getElementById("formKehadiran").style.display = "block";
+            fetchJuzOptions();
+        }
+
+        function fetchJuzOptions() {
+            fetch('backend.php?action=getJuzTerpakai')
+                .then(response => response.json())
+                .then(data => {
+                    let select = document.getElementById("juz");
+                    select.innerHTML = "";
+                    for (let i = 1; i <= 30; i++) {
+                        if (!data.includes(i.toString())) {
+                            let option = document.createElement("option");
+                            option.value = i;
+                            option.textContent = `Juz ${i}`;
+                            select.appendChild(option);
+                        }
+                    }
+                    if (select.innerHTML === "") {
+                        for (let i = 1; i <= 30; i++) {
+                            let option = document.createElement("option");
+                            option.value = i;
+                            option.textContent = `Juz ${i}`;
+                            select.appendChild(option);
+                        }
+                    }
+                });
+        }
+
+        function daftarHadir() {
+            let nama = document.getElementById("nama").value.trim();
+            let nomorWa = document.getElementById("nomorWa").value.trim();
+            let juz = document.getElementById("juz").value;
+
+            if (nama === "" || nomorWa === "") {
+                alert("Mohon isi semua data!");
+                return;
+            }
+
+            fetch("backend.php?action=daftarHadir", {
+                method: "POST",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: `nama=${encodeURIComponent(nama)}&nomorWa=${encodeURIComponent(nomorWa)}&juz=${juz}`
+            }).then(() => {
+                fetchPeserta();
+                let pesan = `Assalamu'alaikum, saya *${nama}* telah mengkonfirmasi kehadiran dan mendapatkan *Juz ${juz}*.`;
+                window.open(`https://wa.me/6289656433788?text=${encodeURIComponent(pesan)}`, "_blank");
+            });
+        }
+
+        function fetchPeserta() {
+            fetch("backend.php?action=getPeserta")
+                .then(response => response.json())
+                .then(data => {
+                    let listPeserta = document.getElementById("listPeserta");
+                    listPeserta.innerHTML = "";
+                    data.forEach((p, index) => {
+                        let row = `<tr>
+                            <td>${index + 1}</td>
+                            <td>${p.nama}</td>
+                            <td>Juz ${p.juz}</td>
+                        </tr>`;
+                        listPeserta.innerHTML += row;
+                    });
+                });
+        }
+
+        fetchPeserta();
+    </script>
+
 </body>
 </html>
