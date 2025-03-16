@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taqri - Kehadiran</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>TAQRI</h1>
+        <h2>Takhtif & Tilawah Qur'an Ramadhan Insan Sejahtera</h2>
+
+        <div class="countdown">
+            <h3>Waktu Acara Dimulai:</h3>
+            <p id="timer"></p>
+        </div>
+
+        <h3 class="judul">Kehadiran</h3>
+
+        <form id="kehadiranForm">
+            <input type="text" id="nama" placeholder="Masukkan Nama" required>
+            <input type="number" id="juz" placeholder="Masukkan Juz (1-30)" min="1" max="30" required>
+            <button type="submit">Hadir</button>
+        </form>
+
+        <h3>Daftar Kehadiran</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Nama</th>
+                    <th>Juz</th>
+                </tr>
+            </thead>
+            <tbody id="kehadiranList"></tbody>
+        </table>
+
+        <button id="resetButton">Reset Kehadiran</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
